@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const [contests, setContests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const apiUrl = 'http://localhost:3000/v1/contests';
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchContests = async () => {
+      const token = localStorage.getItem('token'); // Recupera o token do localStorage
+      if (!token) {
+        navigate('/login'); // Redireciona para login se o token não estiver presente
+        return;
+      }
+
       try {
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Envia o token no header Authorization
           },
         });
 
@@ -30,7 +39,7 @@ const Home = () => {
     };
 
     fetchContests();
-  }, []);
+  }, [apiUrl, navigate]);
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
   if (error) return <div className="text-center py-10 text-red-600">Error: {error}</div>;
